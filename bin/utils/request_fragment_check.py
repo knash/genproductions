@@ -32,9 +32,9 @@ parser = argparse.ArgumentParser(
                   *                         re-create the gridpack using the updated genproductions area
 
                ERRORS:
-                  * [ERROR] Memory is not 2300 or 4000 GB"
-                  * [ERROR] Memory is 2300 GB while number of cores is XX but not = 1
-                  * [ERROR] Memory is 4000 GB while number of cores is 1 but not = 2,4 or 8
+                  * [ERROR] Memory is not 2300 or 4000 MB"
+                  * [ERROR] Memory is 2300 MB while number of cores is XX but not = 1
+                  * [ERROR] Memory is 4000 MB while number of cores is 1 but not = 2,4 or 8
                   * [ERROR] Gridpack should have used cvmfs path instead of eos path
                   * [ERROR] Matched sample but matching efficiency is 1!
                   * [ERROR] MG5_aMC@NLO multi-run patch missing in gridpack - please re-create a gridpack
@@ -136,7 +136,7 @@ for num in range(0,len(prepid)):
         mem = r['memory']
         filter_eff = r['generator_parameters'][-1]['filter_efficiency']
         match_eff = r['generator_parameters'][-1]['match_efficiency']
-        print (pi)
+        print pi+"    Status= "+r['status']
         check = []
         purepythiacheck = []
         powhegcheck = []
@@ -145,13 +145,19 @@ for num in range(0,len(prepid)):
         MGpatch = [] 
         ME = ["PowhegEmissionVeto","aMCatNLO"] # ME = matrix element
         MEname = ["powheg","madgraph","mcatnlo"]
-        tune = ["CP5","CUEP8M1"] 
+        tune = ["CP5","CUEP8M1","CP1","CP2","CP3","CP4"] 
         mcatnlo_flag = 0
         loop_flag = 0
-        knd =  10
+        knd =  -1
         nPartonsInBorn_flag = 0
         matching = 10
         ickkw = 'del' # ickkw = matching parameter in madgraph
+        autoptjmjj_c = 'del'
+        test_drjj_c = -1
+        drjj = 1000
+	if "seesaw" in dn.lower() and "fall18" in pi.lower(): #temporary special condition for fall18/autumn18
+	    print "* [WARNING] Please check the priority of this sample in fall18/autumn18"
+	    print "*           This sample should be finished by mid-january" 
         for item in te:
             timeperevent = float(item)
         if timeperevent > 150.0 :
@@ -175,11 +181,11 @@ for num in range(0,len(prepid)):
         else :
             nthreads = int(re.search('nThreads(.*?) --',ttxt).group(1))
         if mem != 2300 and mem != 4000 :
-            print "* [ERROR] Memory is not 2300 or 4000 GB"
+            print "* [ERROR] Memory is not 2300 or 4000 MB"
         if mem == 2300 and nthreads != 1 :
-            print "* [ERROR] Memory is "+str(mem)+" GB while number of cores is "+str(nthreads)+" but not = 1"
+            print "* [ERROR] Memory is "+str(mem)+" MB while number of cores is "+str(nthreads)+" but not = 1"
         if mem == 4000 and nthreads == 1 :
-            print "* [ERROR] Memory is "+str(mem)+" GB while number of cores is "+str(nthreads)+" but not = 2,4 or 8"
+            print "* [ERROR] Memory is "+str(mem)+" MB while number of cores is "+str(nthreads)+" but not = 2,4 or 8"
         os.system('wget -q https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_fragment/'+pi+' -O '+pi)
         os.system('mkdir -p '+my_path+'/'+pi)
         if int(os.popen('grep -c eos '+pi).read()) == 1 :
@@ -213,11 +219,21 @@ for num in range(0,len(prepid)):
                     if os.path.isfile(fname) is True :
 #                        ickkw = os.popen('grep "= ickkw" '+fname).read()
                        ickkw = os.popen('more '+fname+' | tr -s \' \' | grep "= ickkw"').read()
+                       autoptjmjj_c = os.popen('more '+fname+' | tr -s \' \' | grep "= auto_ptj_mjj"').read()
+                       drjj_c = os.popen('more '+fname+' | tr -s \' \' | grep "= drjj"').read()
                     elif os.path.isfile(fname2) is True :    
 #                        ickkw = os.popen('grep "= ickkw" '+fname2).read()
                        ickkw = os.popen('more '+fname2+' | tr -s \' \' | grep "= ickkw"').read()
+                       autoptjmjj_c = os.popen('more '+fname2+' | tr -s \' \' | grep "= auto_ptj_mjj"').read()
+                       drjj_c = os.popen('more '+fname2+' | tr -s \' \' | grep "= drjj"').read()
+                    test_autoptjmjj = autoptjmjj_c.split()
+                    test_drjj_c = drjj_c.split()
                     matching = int(re.search(r'\d+',ickkw).group())
                     ickkw = str(ickkw)  
+                    if matching == 1 and test_autoptjmjj[0].lower() != "true":
+                        print "* [ERROR] Please set True = auto_ptj_mjj for MLM"    
+                    if matching == 1 and float(test_drjj_c[0]) > 0:
+                        print "* [ERROR] drjj should be set to 0.0 for MLM"
                     if matching == 1 or matching == 2:
                         if match_eff == 1:
                             print "* [ERROR] Matched sample but matching efficiency is 1!"
@@ -273,23 +289,26 @@ for num in range(0,len(prepid)):
              powhegcheck.append(int(os.popen('grep -c -i PowhegEmission '+pi).read()))
              if powhegcheck[0] > 0 :
                  print "* [ERROR] Please remove POWHEG settings for MG requests."
-        if knd > 2 :
+        if knd == -1 :
              purepythiacheck.append(int(os.popen('grep -c -i Pythia8aMCatNLOSettings '+pi).read()))
              purepythiacheck.append(int(os.popen('grep -c -i PowhegEmission '+pi).read()))
              if purepythiacheck[0] > 0 or purepythiacheck[1] >0 :
-                 print "* [ERROR] Please remove aMCatNLO or POWHEG settings for pure Pythia requests."
+                 print "* [WARNING] Please remove aMCatNLO or POWHEG settings if this is a pure Pythia request."
+                 print "*           If it's not a pure request, in the future, please include madgraph/powheg or amcatnlo"
+                 print "*           in the name of the dataset"
         if loop_flag == 1:
             if mcatnlo_flag == 1: 
                 print "* [ERROR] You are using a loop induced process, [noborn=QCD]."
                 print "*         Please remove all occurances of Pythia8aMCatNLOSettings from the fragment"
             if nPartonsInBorn_flag == 1:
                 print "* [ERROR] You are using a loop induced process, [noborn=QCD]."
-                print "*         Please remove all TimeShower:nPartonsInBorn from the fragment"                
-        for kk in range (0, 2):   
+                print "*         Please remove all TimeShower:nPartonsInBorn from the fragment"                        
+        for kk in range (0, 6):   
             tunecheck.append(int(os.popen('grep -c -i '+tune[kk]+' '+pi).read()))
-        if tunecheck[0] < 3 and tunecheck[1] < 3 and fsize != 0:
-            print "* [ERROR] Tune configuration wrong in the fragment"
-        elif tunecheck[0] > 2 or tunecheck[1] >2 and fsize != 0:
+        tune_check_tmp = [i for i, n in enumerate(tunecheck) if n > 2]
+        if tune_check_tmp[0] < 3 and len(tune_check_tmp) > 1 and fsize != 0:
+            print "* [ERROR] Tune configuration may be wrong in the fragment"
+        elif tune_check_tmp[0] > 2 and fsize != 0:    
             print "* [OK] Tune configuration probably OK in the fragment"
             if tunecheck[0] > 2 :
                 if 'Fall18' not in pi and 'Fall17' not in pi :
@@ -310,6 +329,6 @@ for num in range(0,len(prepid)):
                     print "* [ERROR] Parton shower weight configuretion not OK in the fragment" 
         if int(os.popen('grep -c -i filter '+pi).read()) > 3 and filter_eff == 1:
             print "* [ERROR] Filters in the fragment but filter efficiency = 1"
-    os.popen("rm -rf "+my_path+pi).read()  
+#    os.popen("rm -rf "+my_path+pi).read()  
 print "***********************************************************************************"
 print ""
