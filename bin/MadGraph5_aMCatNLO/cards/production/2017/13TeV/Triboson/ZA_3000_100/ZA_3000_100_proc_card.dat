@@ -1,0 +1,10 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set loop_optimized_output True
+set complex_mass_scheme False
+import model Radion_EW_all_gauge_inv
+generate p p > wkk+ r > w+ a z
+add process p p > wkk- r > w- a z
+add process p p > wkk+ r > w+ a z j
+add process p p > wkk- r > w- a z j
+output ZA_3000_100

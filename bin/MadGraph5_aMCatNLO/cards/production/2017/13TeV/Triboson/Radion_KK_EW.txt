@@ -1,0 +1,59 @@
+
+
+This is the simplified model with KK EW gauge bosons and Radion, where only EW gauge fields are in the extended bulk. All decay width is only calculated at tree level and 2 body decays.
+
+
+1 Particles in MG5 model: KK W/W^3/B : WKK/W3KK/BKK, Radion: R, SM particles are the same as usual.
+
+2 Parameters
+   (a) Input Parameters: 
+	Mass: 
+	MKK (KK scale, which also sets KK EW gauge boson masses),MR (Radion mass); 
+	
+	Couplings: 
+	ggrav : KK gravity coupling. 
+        gWKK : coupling for KK W.
+       	gBKK : coupling for KK Hypercharge. 
+       	epsilon: one parameter in the coupling (see below).
+
+  (b) Allowed parameter region:
+      MKK >~  3000  GeV  (Constrained by current W' decaying to lepton+MET bounds)
+      MR  >~  O(100) GeV (Mostly constrained by current diphoton bounds.)
+      ggrav  :     ggrav  \in [1,6]
+   gWKK/gBKK :  gWKK/gBKK \in [3,6]
+      epsilon: Epsilon has a natural value of 1/(a few). We choose it to be 0.5 in our study.
+  
+  (c) Total widths of new particles are calculated by Madgraph once we set the decay width to be “Auto”. In our model, the width for WKK is a few % and the radion is <1%. So both widths are relatively narrow. 
+     
+
+3 Lagrangian(WKK for example):
+       WKK,fermions coupling:           gw^2/gWKK  WKK_{mu} J^{mu}_SM, where J^{mu}_SM is SM W current and gw is SM W coupling. This gives the production of WKK via quarks and part of WKK decay.
+
+       WKK,R,W coupling:                epsilon ggrav gw/gWKK R/MKK WKK_{mu,nu}W_{mu,nu}, where WKK_{mu,nu}(W_{mu,nu}) is the field strength of KK (SM) W.
+
+
+       R, SM EW gauge boson coupling:  (-1/4) ggrav [ (gw/gWKK)^2 R/MKK W_{mu,nu}W_{mu,nu} + (gB/gBKK)^2 R/MKK B_{mu,nu}B_{mu,nu}]
+                                       where gB is the SM hypercharge coupling and B_{\mu} is the SM hypercharge field.
+
+4 Decay channels(WKK for example):
+       
+       WKK -> R W, WKK-> l+l-, WKK-> jj(q qbar),WKK-> W h, WKK -> W Z,
+       R   -> W W, R  -> Z Z , R  -> Z A, R  -> A A
+
+5 Tri-W     channel is , p p > WKK > R W, R > W W 
+  W+2photon channel is , p p > WKK > R W, R > A A 
+
+6 Benchmark points for three isolated bosons:
+
+  Tri-W     channel:  gWKK=3, gBKK=6, ggrav=6, epsilon=0.5, MKK=3000,  MR=1000 or 1500
+  W+2photon channel:  gWKK=3, gBKK=3, ggrav=6, epsilon=0.5, MKK=3000,  MR=1000 or 1500 
+  
+  Benchmark points for boosted di-W + an isolated W:
+  
+  gWKK=3, gBKK=6, ggrav=6, epsilon=0.5, MKK=3000,  MR~200GeV
+
+  These benchmark points are safe from current bounds.
+
+7 External parameters can be simply adjusted in the parameter card, but decay-width of KK gauge bosons and Radion will NOT change automatically. I suggest using “Auto” in decay width to calculate if external parameters are changed. This point is quite important, otherwise the cross-section will be completely off.
+
+
