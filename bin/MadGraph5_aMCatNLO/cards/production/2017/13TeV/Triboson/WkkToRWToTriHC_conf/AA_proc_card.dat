@@ -1,0 +1,7 @@
+set group_subprocesses Auto
+set ignore_six_quark_processes False
+set loop_optimized_output True
+set complex_mass_scheme False
+import model Radion_EW_all_gauge_inv
+generate p p > bkk r > a a a
+add process p p > bkk r > a a a j
